@@ -11,7 +11,7 @@ def process_audiofile(audio_string):
     init = time()
 
     audio_string = audio_string.replace('\n','')
-    audio_string = audio_string.split('base64,')[1:] # Removes prefix
+    audio_string = ''.join(audio_string.split('base64,')[1:]) # Removes prefix
 
     # with open("test_audio", "r") as f:
     #     f.write(audio_string)
@@ -39,11 +39,15 @@ def process_audiofile(audio_string):
         # Listen for the data (load audio to memory)
         audio_data = r.record(source)
 
-    text = r.recognize_google(audio_data)  
+    try:
+        text = r.recognize_google(audio_data)  
+    except:
+        cprint("Speech recognition error", "yellow")
+        return ""
+
     print("Transcription: ", text)
-
     print(f"Transcribed: {time() - init}")
-
+    return text
 
 if __name__ == '__main__':
     with open("test_audio", "r") as f:
