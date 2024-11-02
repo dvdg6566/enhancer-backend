@@ -35,7 +35,7 @@ def handle_connect(data):
 @socketio.on('audioStream')
 def handle_audio(data):
     cprint(f'Received Audio!', "green")
-    audio(data)
+    audio.process_audiofile(data)
     
     return 'Success'
 
@@ -56,4 +56,7 @@ if __name__ == '__main__':
     cprint("--------------------------------------", "cyan")
     print()
 
+    handle_audio('')
+
     socketio.run(app,host='0.0.0.0',port=8000)
+
