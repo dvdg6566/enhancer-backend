@@ -10,6 +10,8 @@ from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
+from audio import audio
+
 app = Flask(__name__)
 CORS(app)
 
@@ -33,7 +35,8 @@ def handle_connect(data):
 @socketio.on('audioStream')
 def handle_audio(data):
     cprint(f'Received Audio!', "green")
-    print(data)
+    audio(data)
+    
     return 'Success'
 
 @socketio.on('lol')
