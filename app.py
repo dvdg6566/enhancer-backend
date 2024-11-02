@@ -35,15 +35,39 @@ def handle_connect(data):
 @socketio.on('audioStream')
 def handle_audio(data):
     cprint(f'Received Audio!', "green")
-    audio.process_audiofile(data)
-    
-    return 'Success'
+    output_text = audio.process_audiofile(data)
+    cmd = ""
 
-@socketio.on('lol')
+    if "enhance" or "enhanced" in output_text:
+        cmd = "enhance"
+    elif "go back" or "back" in output_text:
+        cmd = "back"
+    elif "sus" in output_text:
+        cmd = "sus"
+    elif "zoom" in output_text:
+        cmd = "zoom"
+    elif "reset" in output_text:
+        cmd = "reset"
+
+    if cmd == "": return 'Success'
+
+    cprint(f"Emitting `{cmd}` command", "green")
+    emit(cmd, broadcast=True)
+
+@socketio.on('imageStream')
 def handle_audio2(data):
-    cprint(f'Received Test Message!', "green")
-    print(data)
-    return 'Success'
+    cprint(f'Received Image!', "green")
+    # output_state, payload = gestures.process(data)
+    output_state = ""
+
+    # Whitelisted states: 
+    states = [
+        "throw", "point", "swipe", "snap", "zoomin"
+    ]
+
+    if output_state not in states: return 'Success'
+    cprint(f"Emitting `{output_state}` command", "green")
+    emit(output_state, broadcast=True)
 
 @socketio.on('disconnection')
 def handle_disconnect():
