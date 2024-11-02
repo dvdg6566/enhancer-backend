@@ -11,9 +11,10 @@ def process_audiofile(audio_string):
     init = time()
 
     audio_string = audio_string.replace('\n','')
+    audio_string = audio_string.split('base64,')[1:] # Removes prefix
 
-    with open("test_audio", "w") as f:
-        f.write(audio_string)
+    # with open("test_audio", "r") as f:
+    #     f.write(audio_string)
 
     webm_filename = "output.webm"
     wav_filename = "output.wav"
@@ -42,3 +43,10 @@ def process_audiofile(audio_string):
     print("Transcription: ", text)
 
     print(f"Transcribed: {time() - init}")
+
+
+if __name__ == '__main__':
+    with open("test_audio", "r") as f:
+        audio_string = f.read()
+
+    process_audiofile(audio_string)
