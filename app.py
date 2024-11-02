@@ -36,11 +36,12 @@ def handle_connect(data):
 def handle_audio(data):
     cprint(f'Received Audio!', "green")
     output_text = audio.process_audiofile(data)
+    print(output_text)
     cmd = ""
 
-    if "enhance" or "enhanced" in output_text:
+    if "enhance" in output_text or "enhanced" in output_text:
         cmd = "enhance"
-    elif "go back" or "back" in output_text:
+    elif "go back" in output_text or "back" in output_text:
         cmd = "back"
     elif "sus" in output_text:
         cmd = "sus"
@@ -49,7 +50,9 @@ def handle_audio(data):
     elif "reset" in output_text:
         cmd = "reset"
 
-    if cmd == "": return 'Success'
+    if cmd == "": 
+        cprint(f"No commands detected")
+        return 'Success'
 
     cprint(f"Emitting `{cmd}` command", "green")
     emit(cmd, broadcast=True)
