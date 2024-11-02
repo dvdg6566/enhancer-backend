@@ -3,43 +3,42 @@ from flask_socketio import SocketIO, emit
 import os
 import json
 from uuid import uuid4
+from termcolor import colored, cprint
 
 # Loads environment variables using dotenv
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
+app = Flask(__name__)
+
+def default():
+    return 'Success!'
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.add_url_rule('/', view_func = default, methods = ['GET'])
+socketio = SocketIO(app)
 
 ''' BEGIN WEBSOCKET CONNECTIONS AND ROUTES ------------------
 '''
 
-connections =  []
-
-@socketio.on('connect')
+@socketio.on('connection')
 def handle_connect(data):
-    global connections
-    user_id = int(request.headers['Userid'])
-    connection_type = request.headers['Connectiontype']
+    cprint(f'Client Connected', "green")
 
-    connections.append({
-        'sid': request.sid,
-        'connection_type': connection_type,
-        'user_id': user_id
-    })
+@socketio.on('audioStream')
+def handle_audio(data):
+    cprint(f'Received Audio!', "green")
+    print(data)
 
-    print(f'Client Connected, total clients: {len(connections)}')
-
-@socketio.on('disconnect')
+@socketio.on('disconnection')
 def handle_disconnect():
-    global connections
-    sid = request.sid
-    connections = [i for i in connections if i['sid'] != sid]
-
-    print(f'Client Disconnected, total clients: {len(connections)}')
+    cprint(f'Client Disconnected', "red")
 
 if __name__ == '__main__':
-    print("--------------------------------------")
-    print("------Running websocket app-----------")
-    print("--------------------------------------")
+    print()
+    cprint("--------------------------------------", "cyan")
+    cprint("------Running websocket app-----------", "cyan")
+    cprint("--------------------------------------", "cyan")
+    print()
 
     socketio.run(app,host='0.0.0.0',port=8000)
