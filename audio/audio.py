@@ -33,8 +33,6 @@ def process_audiofile(audio_string):
         cprint("ffmpeg failed, autofile invalid!", "red")
         return ''
 
-    print(f"Converted file: {time() - init}")
-
     with sr.AudioFile(wav_filename) as source:
         # Listen for the data (load audio to memory)
         audio_data = r.record(source)

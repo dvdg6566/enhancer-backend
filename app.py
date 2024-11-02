@@ -25,7 +25,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 ''' BEGIN WEBSOCKET CONNECTIONS AND ROUTES ------------------
 '''
 
-@socketio.on('connection')
+@socketio.on('connect')
 def handle_connect(data):
     cprint(f'Client Connected', "green")
     print(data)
@@ -55,7 +55,7 @@ def handle_audio(data):
         return 'Success'
 
     cprint(f"Emitting `{cmd}` command", "green")
-    emit(cmd, broadcast=True)
+    emit('returnCommand', cmd, broadcast=True)
 
 @socketio.on('imageStream')
 def handle_audio2(data):
@@ -70,9 +70,9 @@ def handle_audio2(data):
 
     if output_state not in states: return 'Success'
     cprint(f"Emitting `{output_state}` command", "green")
-    emit(output_state, broadcast=True)
+    emit('returnCommand', output_state, broadcast=True)
 
-@socketio.on('disconnection')
+@socketio.on('disconnect')
 def handle_disconnect():
     cprint(f'Client Disconnected', "red")
 
