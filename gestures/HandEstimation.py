@@ -5,6 +5,7 @@ import time#gets current time easier
 import multiprocessing
 from flask import Flask,Response
 from flask_cors import CORS
+import requests
 
 mp_drawing = mp.solutions.drawing_utils#helps draw landmarks (joints)
 mp_hands =mp.solutions.hands#Hand detection tools
@@ -14,17 +15,24 @@ def text(image,txt,pos):#draws text to the screen
     ,(0,0,255),2,cv2.LINE_AA,False)
    
 #sends commands
+target = "http://18.171.127.234:8000/sendGesture"
 def command(val):
+    cmd = ""
     if(val==0):
-        print("Throw")
+        cmd = "throw"
     elif(val==1):
-        print("Swipe")
+        cmd = "swipe"
     elif(val==2):
-        print("Middle finger")
+        cmd = "middle"
     elif(val==3):
-        print("Snap")
+        cmd = "snap"
     elif(val==4):
-        print("Zoom in")
+        cmd = "zoomin"
+    elif val == 5:
+        cmd = "point"
+
+    print(f"Sending command {cmd}")
+    r = requests.post(target, data={"gesture": cmd})
 
 #this bit is fiddly, make sure u check diffrent cams and perms
 cap =cv2.VideoCapture(0)#getting camera feed from first device
@@ -197,10 +205,9 @@ def webcam():
                     mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS)#draws landmarks
                     draw_to_hand(image,hand,str(print_vals[num]))#DEBUGGER
                         
-            # cv2.imshow('Hand tracking', image)#renders image to the screen
-            print("Updating frame")
-            ret, frame = cap.read()
-            ret, buffer = cv2.imencode('.jpg', frame)
+            # cv2.imshow('Hand tracking', image)
+            #renders image to the screen
+            ret, buffer = cv2.imencode('.jpg', image)
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                        b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')

@@ -62,20 +62,25 @@ def handle_audio(data):
     cprint(f"Emitting `{cmd}` command", "green")
     emit('returnCommand', cmd, broadcast=True)
 
-@socketio.on('imageStream')
-def handle_audio2(data):
-    cprint(f'Received Image!', "green")
-    # output_state, payload = gestures.process(data)
-    output_state = ""
+def handle_gestures(data):
+    data = json.loads(request.data)
+    gesture = data['gesture']
+
+    cprint(f'Received gesture {gesture}!', "green")
 
     # Whitelisted states: 
-    states = [
-        "throw", "point", "swipe", "snap", "zoomin"
+    whitelisted_gestures = [
+        "throw", "point", "swipe", "snap", "zoomin", "middle"
     ]
 
-    if output_state not in states: return 'Success'
-    cprint(f"Emitting `{output_state}` command", "green")
-    emit('returnCommand', output_state, broadcast=True)
+    if gesture not in whitelisted_gestures: 
+        cprint(f'Invalid gesture {gesture}!', "red")
+        return 'Success'
+
+    cprint(f"Emitting `{gesture}` gesture", "green")
+    emit('returnCommand', gesture, broadcast=True)
+
+app.add_url_rule('/sendGesture', view_func = handle_gestures, methods = ['POST'])
 
 @socketio.on('disconnect')
 def handle_disconnect():
