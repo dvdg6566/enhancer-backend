@@ -43,9 +43,6 @@ def draw_to_hand(image,hand,txt):#gets string label
     coords = tuple(np.multiply(wrist,[width,height]).astype(int))
     text(image,txt,coords)
 #END OF DEBUGGER FUNCTIONS
-    
-
-
 
 # function definition to compute magnitude o f the vector
 def magnitude(vector):
