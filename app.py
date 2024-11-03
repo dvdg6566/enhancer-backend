@@ -43,7 +43,7 @@ def handle_connect(data):
 def handle_audio(data):
     global lastEntryTime
 
-    cprint(f'Received Audio!', "green")
+    cprint(f'Received Audio!', "cyan")
     output_text = audio.process_audiofile(data)
     print(output_text)
     cmd = ""
@@ -68,7 +68,7 @@ def handle_audio(data):
         cprint(f"No commands detected")
         return 'Success'
 
-    if lastEntryTime != None and time() - lastEntryTime < 2:
+    if lastEntryTime != None and time() - lastEntryTime < 1.5:
         cprint(f"Not invoking `{cmd}` command", "yellow")
         lastEntryTime = time()
         return
@@ -82,9 +82,10 @@ def handle_gestures():
 
     data = json.loads(request.data)
     gesture = data['gesture']
-    print(gesture)
+    point = data['point']
+    print(point)
 
-    cprint(f'Received gesture {gesture}!', "green")
+    cprint(f'Received gesture {gesture}!', "cyan")
 
     # Whitelisted states: 
     whitelisted_gestures = [
