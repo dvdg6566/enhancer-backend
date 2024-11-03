@@ -20,7 +20,7 @@ def command(val, point=[]):
     cmd = cmds[val]
 
     print(f"Sending command {cmd}")
-    data = {"gesture": cmd, "point": point}
+    data = {"gesture": cmd}
     r = requests.post(target, data=json.dumps(data))
     print(r.text)
 

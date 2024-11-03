@@ -16,10 +16,10 @@ from audio import audio
 app = Flask(__name__)
 CORS(app)
 # Disables flask logging
-app.logger.disabled = True
+#app.logger.disabled = True
 import logging
-log = logging.getLogger('werkzeug')
-log.disabled = True
+#log = logging.getLogger('werkzeug')
+#log.disabled = True
 
 def default():
     return 'Success!'
@@ -82,8 +82,6 @@ def handle_gestures():
 
     data = json.loads(request.data)
     gesture = data['gesture']
-    point = data['point']
-    print(point)
 
     cprint(f'Received gesture {gesture}!', "cyan")
 
