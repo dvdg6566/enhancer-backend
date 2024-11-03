@@ -41,6 +41,8 @@ def handle_connect(data):
 
 @socketio.on('audioStream')
 def handle_audio(data):
+    global lastEntryTime
+
     cprint(f'Received Audio!', "green")
     output_text = audio.process_audiofile(data)
     print(output_text)
@@ -66,16 +68,18 @@ def handle_audio(data):
         cprint(f"No commands detected")
         return 'Success'
 
+    if lastEntryTime != None and time() - lastEntryTime < 2:
+        cprint(f"Not invoking `{cmd}` command", "yellow")
+        lastEntryTime = time()
+        return
+
     cprint(f"Emitting `{cmd}` command", "green")
-
-    if lastEntryTime != None and time() - lastEntryTime < 1:
-        cprint(f"Not invoking `{cmd}` command", "yelklow")
-
     lastEntryTime = time()
-
     emit('returnCommand', cmd, broadcast=True)
 
 def handle_gestures():
+    global lastEntryTime
+
     data = json.loads(request.data)
     gesture = data['gesture']
     print(gesture)
@@ -91,11 +95,12 @@ def handle_gestures():
         cprint(f'Invalid gesture {gesture}!', "red")
         return 'Success'
 
-    if lastEntryTime != None and time() - lastEntryTime < 1:
-        cprint(f"Not invoking `{gesture}` gesture", "yelklow")
+    if lastEntryTime != None and time() - lastEntryTime < 2:
+        cprint(f"Not invoking `{cmd}` command", "yellow")
+        lastEntryTime = time()
+        return 'Success!'
 
     lastEntryTime = time()
-
     cprint(f"Emitting `{gesture}` gesture", "green")
     socketio.emit('returnCommand', gesture)
     return 'Success!'
