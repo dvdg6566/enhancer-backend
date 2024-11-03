@@ -2,7 +2,9 @@ import mediapipe as mp#hand detection
 import cv2#video feed
 import numpy as np#math
 import time#gets current time easier
-
+import multiprocessing
+from flask import Flask
+from flask_cors import CORS
 
 mp_drawing = mp.solutions.drawing_utils#helps draw landmarks (joints)
 mp_hands =mp.solutions.hands#Hand detection tools
@@ -23,10 +25,34 @@ def command(val):
         print("Snap")
     elif(val==4):
         print("Zoom in")
-        
 
 #this bit is fiddly, make sure u check diffrent cams and perms
 cap =cv2.VideoCapture(0)#getting camera feed from first device
+
+
+app = Flask(__name__)
+
+# Disables flask logging
+app.logger.disabled = True
+import logging
+log = logging.getLogger('werkzeug')
+log.disabled = True
+
+CORS(app)
+
+@app.route('/webcam')
+def webcam_display():
+    return Response(webcam(), mimetype='multipart/x-mixed-replace;boundary=frame')
+
+def run_server():
+    print("[+] Starting flask server in background")
+    print("[+] Flask Server listening on port 8080")
+    app.run(host='0.0.0.0', port=8080, debug=False)
+
+server_process = multiprocessing.Process(target=run_server)
+server_process.start()
+time.sleep(1)
+
 
 #DEBUGGER Functions
 #gets coords
@@ -199,6 +225,11 @@ with mp_hands.Hands(min_detection_confidence=0.8,min_tracking_confidence=0.5,max
                 draw_to_hand(image,hand,str(print_vals[num]))#DEBUGGER
                     
         cv2.imshow('Hand tracking', image)#renders image to the screen
+        print("Updating frame")
+        ret, frame = cap.read()
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        print(frame)
         
         if cv2.waitKey(10) & 0xFF == ord('q'):#closes window when q
             break
