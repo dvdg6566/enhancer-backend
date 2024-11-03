@@ -14,6 +14,11 @@ from audio import audio
 
 app = Flask(__name__)
 CORS(app)
+# Disables flask logging
+app.logger.disabled = True
+import logging
+log = logging.getLogger('werkzeug')
+log.disabled = True
 
 def default():
     return 'Success!'
@@ -62,9 +67,10 @@ def handle_audio(data):
     cprint(f"Emitting `{cmd}` command", "green")
     emit('returnCommand', cmd, broadcast=True)
 
-def handle_gestures(data):
+def handle_gestures():
     data = json.loads(request.data)
     gesture = data['gesture']
+    print(gesture)
 
     cprint(f'Received gesture {gesture}!', "green")
 
@@ -78,7 +84,8 @@ def handle_gestures(data):
         return 'Success'
 
     cprint(f"Emitting `{gesture}` gesture", "green")
-    emit('returnCommand', gesture, broadcast=True)
+    socketio.emit('returnCommand', gesture)
+    return 'Success!'
 
 app.add_url_rule('/sendGesture', view_func = handle_gestures, methods = ['POST'])
 
