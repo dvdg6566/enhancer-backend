@@ -2,6 +2,7 @@ import mediapipe as mp#hand detection
 import cv2#video feed
 import numpy as np#math
 import time#gets current time easier
+import multiprocessing
 from flask import Flask,Response
 from flask_cors import CORS
 import requests
@@ -13,15 +14,15 @@ mp_hands =mp.solutions.hands#Hand detection tools
 def text(image,txt,pos):#draws text to the screen
     cv2.putText(image,txt,pos,cv2.FONT_HERSHEY_SIMPLEX,1
     ,(0,0,255),2,cv2.LINE_AA,False)
-
+   
+#sends commands
 target = "http://18.171.127.234:8000/sendGesture"
-def command(val, point=[]):
+def command(val):
     cmds = ["throw", "swipe", "middle", "snap", "zoomin", "point"]
     cmd = cmds[val]
 
     print(f"Sending command {cmd}")
-    data = {"gesture": cmd, "point": point}
-    r = requests.post(target, data=json.dumps(data))
+    r = requests.post(target, data=json.dumps({"gesture": cmd}))
     print(r.text)
 
 #this bit is fiddly, make sure u check diffrent cams and perms
@@ -43,9 +44,6 @@ def draw_to_hand(image,hand,txt):#gets string label
     coords = tuple(np.multiply(wrist,[width,height]).astype(int))
     text(image,txt,coords)
 #END OF DEBUGGER FUNCTIONS
-    
-
-
 
 # function definition to compute magnitude o f the vector
 def magnitude(vector):
@@ -89,14 +87,13 @@ def closeopen(a):
 
 
 prev = [np.array([0,0,0]),np.array([0,0,0])]#Previous positon (needed for motion calculation)
-ct=[0,0,0,0,0,0]#counter for the number of times the conditions for each command were met
+ct=[0,0,0,0,0]#counter for the number of times the conditions for each command were met
 last_time=0#last time an action was triggered
 throw_t=0#needed for functions which change signal
 zoom_in_con=False#checks if the start of zoom in has been done
-point_con=False
 
 def webcam():
-    global prev, ct, last_time, throw_t, zoom_in_con, point_con
+    global prev, ct, last_time, throw_t, zoom_in_con
     #instantiantes Hands model
     #Min_detection ->first detection
     #min_tracking_ is -> after first detection
@@ -169,13 +166,6 @@ def webcam():
                     else:
                         zoom_in_con=False
                         ct[4]=0
-                    
-                    #pointing
-                    if((vals[3] and vals[2] and vals[1]) and not(vals[4])):
-                        ct[5]+=1
-                    else:
-                        point_con=False
-                        ct[5]=0
                         
                     #command caller
                     if(ct[0]>=2 and co==0):
@@ -186,7 +176,7 @@ def webcam():
                         last_time=time.time()
                         command(1)
                         ct[1]=0
-                    elif(ct[2]>=10):
+                    elif(ct[2]>=4):
                         last_time=time.time()
                         command(2)
                         ct[2]=0
@@ -198,19 +188,13 @@ def webcam():
                         last_time=time.time()
                         command(4)
                         ct[4]=0
-                    elif(ct[5]>=4):
-                        point_con=True
-                        
-                    tmp_rec=abs_pos(hand,0)
                         
                 for num, hand in enumerate(results.multi_hand_landmarks):#splits into vars
                     #image is the main image aka frame
                     #hand is the landmarks
                     #mp_hands.Hand_CONNECTIONS tells hand connections
-                    if(point_con):
-                        command(5,joint_coords(8,hand))
                     mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS)#draws landmarks
-                    draw_to_hand(image,hand,str(print_vals[0]))#DEBUGGER
+                    draw_to_hand(image,hand,str(print_vals[num]))#DEBUGGER
                         
             # cv2.imshow('Hand tracking', image)
             #renders image to the screen
