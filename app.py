@@ -5,6 +5,7 @@ import json
 from uuid import uuid4
 from termcolor import colored, cprint
 from flask_cors import CORS, cross_origin
+from time import time
 
 # Loads environment variables using dotenv
 from dotenv import load_dotenv, find_dotenv
@@ -26,6 +27,7 @@ def default():
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.add_url_rule('/', view_func = default, methods = ['GET'])
 socketio = SocketIO(app, cors_allowed_origins="*")
+lastEntryTime = None
 
 ''' BEGIN WEBSOCKET CONNECTIONS AND ROUTES ------------------
 '''
@@ -65,6 +67,12 @@ def handle_audio(data):
         return 'Success'
 
     cprint(f"Emitting `{cmd}` command", "green")
+
+    if lastEntryTime != None and time() - lastEntryTime < 1:
+        cprint(f"Not invoking `{cmd}` command", "yelklow")
+
+    lastEntryTime = time()
+
     emit('returnCommand', cmd, broadcast=True)
 
 def handle_gestures():
@@ -82,6 +90,11 @@ def handle_gestures():
     if gesture not in whitelisted_gestures: 
         cprint(f'Invalid gesture {gesture}!', "red")
         return 'Success'
+
+    if lastEntryTime != None and time() - lastEntryTime < 1:
+        cprint(f"Not invoking `{gesture}` gesture", "yelklow")
+
+    lastEntryTime = time()
 
     cprint(f"Emitting `{gesture}` gesture", "green")
     socketio.emit('returnCommand', gesture)
