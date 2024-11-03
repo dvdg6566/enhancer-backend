@@ -6,6 +6,7 @@ import multiprocessing
 from flask import Flask,Response
 from flask_cors import CORS
 import requests
+import json
 
 mp_drawing = mp.solutions.drawing_utils#helps draw landmarks (joints)
 mp_hands =mp.solutions.hands#Hand detection tools
@@ -17,22 +18,11 @@ def text(image,txt,pos):#draws text to the screen
 #sends commands
 target = "http://18.171.127.234:8000/sendGesture"
 def command(val):
-    cmd = ""
-    if(val==0):
-        cmd = "throw"
-    elif(val==1):
-        cmd = "swipe"
-    elif(val==2):
-        cmd = "middle"
-    elif(val==3):
-        cmd = "snap"
-    elif(val==4):
-        cmd = "zoomin"
-    elif val == 5:
-        cmd = "point"
+    cmds = ["throw", "swipe", "middle", "snap", "zoomin", "point"]
+    cmd = cmds[val]
 
     print(f"Sending command {cmd}")
-    r = requests.post(target, data={"gesture": cmd})
+    r = requests.post(target, data=json.dumps({"gesture": cmd}))
 
 #this bit is fiddly, make sure u check diffrent cams and perms
 cap =cv2.VideoCapture(0)#getting camera feed from first device
