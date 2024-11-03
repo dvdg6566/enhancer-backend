@@ -49,6 +49,8 @@ def handle_audio(data):
         cmd = "zoom"
     elif "reset" in output_text:
         cmd = "reset"
+    elif "left" in output_text:
+        cmd = "left"
 
     if cmd == "": 
         cprint(f"No commands detected")
