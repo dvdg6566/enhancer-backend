@@ -95,7 +95,7 @@ def handle_gestures():
         return 'Success'
 
     if lastEntryTime != None and time() - lastEntryTime < 2:
-        cprint(f"Not invoking `{cmd}` command", "yellow")
+        cprint(f"Not invoking `{gesture}` command", "yellow")
         lastEntryTime = time()
         return 'Success!'
 
